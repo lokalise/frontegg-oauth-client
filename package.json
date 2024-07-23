@@ -1,5 +1,5 @@
 {
-  "name": "@lokalise/your-project-name",
+  "name": "@lokalise/frontegg-oauth-client",
   "version": "1.0.0",
   "scripts": {
     "build": "vite build",
@@ -11,12 +11,12 @@
   },
   "type": "module",
   "files": ["dist"],
-  "main": "./dist/your-project-name.umd.cjs",
-  "module": "./dist/your-project-name.js",
+  "main": "./dist/frontegg-oauth-client.umd.cjs",
+  "module": "./dist/frontegg-oauth-client.js",
   "exports": {
     ".": {
-      "import": "./dist/your-project-name.js",
-      "require": "./dist/your-project-name.umd.cjs"
+      "import": "./dist/frontegg-oauth-client.js",
+      "require": "./dist/frontegg-oauth-client.umd.cjs"
     }
   },
   "publishConfig": {

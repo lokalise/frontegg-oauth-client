@@ -1,4 +1,4 @@
-# YourProjectName
+# FronteggOAuthClient
 
 ## Project Purpose
 
@@ -22,8 +22,8 @@ The following are all handled for you and do not need to be configured:
 ## Getting Started
 
 - [ ] Find and replace all instances of the symbols (case-insensitive) with your project name:
-  - `your-project-name`
-  - `YourProjectName`
+  - `frontegg-oauth-client`
+  - `FronteggOAuthClient`
 - [ ] Add an NPM token to GitHub secrets with the name `NPM_TOKEN`
   - This is required for publishing under the `@lokalise` NPM namespace.
 - [ ] Add a GitHub token to GitHub secrets with the name `GITHUB_TOKEN`
