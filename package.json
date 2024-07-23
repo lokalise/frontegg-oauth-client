@@ -1,0 +1,46 @@
+{
+  "name": "@lokalise/your-project-name",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "vite build",
+    "lint:ts": "tsc --noEmit",
+    "lint": "biome check && npm run lint:ts",
+    "lint:fix": "biome check --write",
+    "test": "vitest run",
+    "commit": "commit"
+  },
+  "type": "module",
+  "files": ["dist"],
+  "main": "./dist/your-project-name.umd.cjs",
+  "module": "./dist/your-project-name.js",
+  "exports": {
+    ".": {
+      "import": "./dist/your-project-name.js",
+      "require": "./dist/your-project-name.umd.cjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.8.3",
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.2",
+    "@commitlint/prompt-cli": "^19.3.1",
+    "@lokalise/biome-config": "^1.3.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.0",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^10.1.1",
+    "@semantic-release/npm": "^12.0.1",
+    "@semantic-release/release-notes-generator": "^14.0.1",
+    "semantic-release": "^24.0.0",
+    "typescript": "^5.5.4",
+    "vite": "^5.3.4",
+    "vite-plugin-dts": "^3.9.1",
+    "vitest": "^2.0.4"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
