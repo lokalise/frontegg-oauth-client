@@ -3,7 +3,7 @@ import { resolve } from 'node:path'
 import dts from 'vite-plugin-dts'
 import { defineConfig } from 'vitest/config'
 
-import packageJson from "./package.json";
+import packageJson from './package.json'
 
 // biome-ignore lint/style/noDefaultExport: Vite expects default export.
 export default defineConfig({
@@ -19,9 +19,9 @@ export default defineConfig({
        * This ensures they are not included directly in package but instead imported from node modules
        */
       external: Object.keys(packageJson.dependencies).flatMap((dep) => [
-      	dep,
-      	// Include all dependency paths, not just root
-      	new RegExp(`^${dep}/`),
+        dep,
+        // Include all dependency paths, not just root
+        new RegExp(`^${dep}/`),
       ]),
       output: {
         // Ensure we can tree-shake properly
