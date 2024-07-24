@@ -1,90 +1,79 @@
-# YourProjectName
+# frontegg-oauth-client
 
-## Project Purpose
+Minimalistic Frontegg OAuth implementation for browser applications. It offers APIs for retrieving and refreshing tokens and basic user data.
 
-This is a template repository, intended to accelerate teams at Lokalise to create public packages for publishing on NPM.
+This package is an alternative to the official [@frontegg/js](https://docs.frontegg.com/docs/vanilla-js) package. 
 
-This repository is not specifically frontend focused.
+## Installation
 
-## Key Features
+Use the package manager npm to install the library.
 
-The following are all handled for you and do not need to be configured:
-
-- Licensing
-- Linting
-- Formatting
-- Testing
-- Building
-- Bundling
-- Automated Versioning
-- Publishing
-
-## Getting Started
-
-- [ ] Find and replace all instances of the symbols (case-insensitive) with your project name:
-  - `your-project-name`
-  - `YourProjectName`
-- [ ] Add an NPM token to GitHub secrets with the name `NPM_TOKEN`
-  - This is required for publishing under the `@lokalise` NPM namespace.
-- [ ] Add a GitHub token to GitHub secrets with the name `GITHUB_TOKEN`
-  - This is required to allow the automated semantic release process to push to `main`.
-- [ ] Update the `CODEOWNERS` file with your personal and/or team tags.
-
-Once you are all setup, we recommend reviewing and rewriting this README as necessary to make it more specific to your project.
-
-The last thing to do is actually start writing your code! We recommend starting from `src/index.ts` and `src/index.test.ts`.
-
-## Customizing the build
-
-The build system uses Vite. It is configured to treat `./src/index.ts` as the entry point of your repository. Feel free
-to change any particulars in `./vite.config.ts`. In particular if you require multiple entry points, we recommend
-reviewing Vite's documentation on this here: [Vite Library Mode](https://vitejs.dev/guide/build.html#library-mode).
-
-In case you add direct or peer dependencies, you should uncomment following lines (and corresponding import above) to
-ensure those dependencies are not directly included in the built package.
-
-```tsx
-external: Object.keys(packageJson.dependencies).flatMap((dep) => [
-	dep,
-	// Include all dependency paths, not just root
-	new RegExp(`^${dep}/`),
-])
+```bash
+npm install @lokalise/frontegg-oauth-client
 ```
 
-## commitlint
+## Usage
 
-You can use `npm run commit` to interactively construct correct commit messsage.
+The library offers several APIs to initiate the OAuth flow and retrieve user data.
 
-Check out [commitlint](https://commitlint.js.org) docs for examples of how to customise.
+```js
+// Create client instance
+const client = new FronteggOAuthClient({
+    baseUrl: 'https://frontegg-custom-url.com',
+    clientId: 'CLIENT_ID',
+    redirectUri: `${window.location.origin}/oauth/callback`,
+    logoutRedirectUri: window.location.origin,
+})
 
-## Release actions
+try {
+    // Retrieve user
+    const user = await client.getUserData();
 
-The following token needs to be set in the Github repo for the `prerelease` and `release` Github Actions to work:
+    // Retrieve token 
+    const accessToken = user.accessToken;
+} catch (error) {
+    // In case we receive a 401 Unauthorized error, we need to redirect the user to the login page.
+    if (error instanceof FronteggError && error.status === 401) {
+        // Retrieve login URL
+        const loginUrl = await client.getOAuthLoginUrl() 
+        
+        // Redirect to Frontegg login page
+        window.location.href = loginUrl;
+        return;
+    }
+    
+    // Rethrow unknown error.
+    throw error
+}
+```
 
-- `secrets.NPM_TOKEN` (need this to publish on NPM)
+You also need to set up the OAuth callback path in your browser app. For that, we use the same client instance as in the code above.
 
-When performing a release, make sure to follow our conventional commit approach, as described in [contribution documentation](https://github.com/lokalise/npm-package-template/blob/main/CONTRIBUTING.md).
+```js
+// OAuth callback app - usually /oauth/callback URL
+const handleRequest = async (request: Request) => {
+    const oauthCode = new URL(request.url).searchParams.get('code')
 
-## License
+    if (!oauthCode) {
+        throw new Error('Missing oauth code');
+    }
 
-This project is APACHE, VERSION 2.0 licensed, see LICENSE.md for details.
+    // After successful login, the client can retrieve 
+    // the access token through the OAuth code.
+    await client.fetchAccessTokenByOAuthCode(oauthCode)
+    
+    
+    // Redirect the user to the main app
+    window.location.href = '/';
+}
+```
 
-## Template Specific Internal Notes
+## Credits
 
-The following notes are only relevant to the maintainers of this template. You may delete this section when you clone it.
+This library is brought to you by a joint effort of Lokalise engineers:
 
-### Creating a release of the template
+[Arthur Suermondt](https://github.com/arthuracs)
+[Szymon Chudy](https://github.com/szymonchudy)
+[Ondrej Sevcik](https://github.com/ondrejsevcik)
 
-- Merge your PR and create a [new draft release](https://github.com/lokalise/npm-package-template/releases/new).
-- Create a new tag `vx.x.x`. Consider the type of changes you added. Major, minor or patch.
-- In Release title mention the same version `vx.x.x`.
-- Generate release notes.
-- Publish Release
 
-## Other Resources
-
-This template represents the culmination of Lokalise technical recommendations as documented in the [Frontend Radar](https://lokalise.atlassian.net/l/cp/Bqkz2hC5).
-
-## Support Us
-
-**lokalise-npm-package-template** was created by Lokalise Engineering Team. Support our work by keeping this line in your README.
