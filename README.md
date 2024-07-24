@@ -4,7 +4,7 @@ Minimalistic Frontegg OAuth implementation for browser applications. It offers A
 
 This package is an alternative to the official [Frontegg React SDK](https://github.com/frontegg/frontegg-react). 
 
-### Installation
+## Installation
 
 Use the package manager npm to install the library.
 
@@ -12,7 +12,7 @@ Use the package manager npm to install the library.
 npm install @lokalise/frontegg-oauth-client
 ```
 
-### Usage
+## Usage
 
 The library offers several APIs to initiate the OAuth flow and retrieve user data.
 
@@ -67,5 +67,13 @@ const handleRequest = async (request: Request) => {
     window.location.href = '/';
 }
 ```
+
+## Credits
+
+This library is brought to you by a joint effort of Lokalise engineers:
+
+[Arthur Suermondt](https://github.com/arthuracs)
+[Szymon Chudy](https://github.com/szymonchudy)
+[Ondrej Sevcik](https://github.com/ondrejsevcik)
 
 
