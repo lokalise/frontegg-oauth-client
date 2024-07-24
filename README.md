@@ -2,7 +2,7 @@
 
 Minimalistic Frontegg OAuth implementation for browser applications. It offers APIs for retrieving and refreshing tokens and basic user data.
 
-This package is an alternative to the official [Frontegg React SDK](https://github.com/frontegg/frontegg-react). 
+This package is an alternative to the official [@frontegg/js](https://docs.frontegg.com/docs/vanilla-js) package. 
 
 ## Installation
 
@@ -47,7 +47,7 @@ try {
 }
 ```
 
-You also need to setup OAuth callback path in your browser app.
+You also need to set up the OAuth callback path in your browser app. For that, we use the same client instance as in the code above.
 
 ```js
 // OAuth callback app - usually /oauth/callback URL
