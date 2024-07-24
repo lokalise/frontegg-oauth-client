@@ -1,6 +1,6 @@
 # frontegg-oauth-client
 
-Minimalistic Frontegg OAuth implementation for browser applications. It offers APIs for retrieving tokens and basic user data.
+Minimalistic Frontegg OAuth implementation for browser applications. It offers APIs for retrieving and refreshing tokens and basic user data.
 
 This package is an alternative to the official [Frontegg React SDK](https://github.com/frontegg/frontegg-react). 
 
