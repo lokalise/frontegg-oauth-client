@@ -72,8 +72,8 @@ const handleRequest = async (request: Request) => {
 
 This library is brought to you by a joint effort of Lokalise engineers:
 
-[Arthur Suermondt](https://github.com/arthuracs)
-[Szymon Chudy](https://github.com/szymonchudy)
-[Ondrej Sevcik](https://github.com/ondrejsevcik)
+- [Arthur Suermondt](https://github.com/arthuracs)
+- [Szymon Chudy](https://github.com/szymonchudy)
+- [Ondrej Sevcik](https://github.com/ondrejsevcik)
 
 
