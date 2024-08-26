@@ -30,7 +30,7 @@
     "@biomejs/biome": "^1.8.3",
     "@lokalise/biome-config": "^1.4.0",
     "@lokalise/package-vite-config": "^3.1.0",
-    "jsdom": "^24.1.1",
+    "jsdom": "^25.0.0",
     "msw": "^2.3.5",
     "semantic-release": "^24.1.0",
     "typescript": "^5.5.4",
