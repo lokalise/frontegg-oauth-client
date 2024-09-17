@@ -7,6 +7,7 @@ export interface FronteggUserData {
   email: string
   profilePictureUrl: string | null | undefined
   externalWorkspaceId: string
+  impersonated: boolean
 }
 
 const GET_FRONTEGG_TOKEN_RESPONSE_SCHEMA = z.object({
@@ -155,15 +156,64 @@ const isTokenExpired = (tokenExpirationTime: number | null) => {
   return tokenExpirationTime - 60 * 60 * 1000 < Date.now()
 }
 
-const GET_FRONTEGG_USER_DATA_RESPONSE_SCHEMA = z.object({
-  id: z.string(),
+/**
+ * Function to decode a JWT token
+ *
+ * @param token the JWT token to decode
+ * @returns the decoded JWT token
+ */
+const decodeJwt = (token: string) => {
+  // Extract the base64 payload from the token
+  const base64Url = token.split('.')[1]
+  // Replace URL-safe characters with the base64 standard characters
+  let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+  // Add padding to the base64 string if needed, as base64 strings need to be a multiple of 4 characters
+  switch (base64.length % 4) {
+    case 0:
+      break
+    case 2:
+      base64 += '=='
+      break
+    case 3:
+      base64 += '='
+      break
+    default:
+      throw new Error('base64 string is not of the correct length')
+  }
+  // Decode the base64 string and replace special characters with their hex representation
+  // Only using atob would not work in all cases, as it does not decode all special characters
+  // See https://stackoverflow.com/a/30106551/10876985 for more details
+  const jsonPayload = decodeURIComponent(
+    atob(base64).replace(/(.)/g, (_m, p) => {
+      let code = (p as string).charCodeAt(0).toString(16).toUpperCase()
+      if (code.length < 2) {
+        code = `0${code}`
+      }
+      return `%${code}`
+    }),
+  )
+  // Parse the JSON payload and return it
+  return JSON.parse(jsonPayload)
+}
+
+const FRONTEGG_DECODED_TOKEN_SCHEMA = z.object({
+  sub: z.string().describe('JWT subject claim used for the Frontegg user id'),
   email: z.string(),
   name: z.string(),
   profilePictureUrl: z.string().nullable().optional(),
   tenantId: z.string(),
+  act: z
+    .object({
+      sub: z
+        .string()
+        .describe('The Frontegg admin user ID of the user impersonating the current session'),
+      type: z.string(),
+    })
+    .optional()
+    .describe('Act object is available only when the current session is being impersonated'),
 })
 
-export type GetFronteggUserDataResponse = z.infer<typeof GET_FRONTEGG_USER_DATA_RESPONSE_SCHEMA>
+export type FronteggDecodedToken = z.infer<typeof FRONTEGG_DECODED_TOKEN_SCHEMA>
 
 /**
  * Class providing a Frontegg OAuth login with AccessToken and UserData.
@@ -246,7 +296,7 @@ export class FronteggOAuthClient {
     if (!this.userDataPromise) {
       this.userDataPromise = this.getAccessToken({ forceRefresh })
         .then((accessToken) => {
-          return this.fetchUserData(accessToken)
+          return this.decodeAccessToken(accessToken)
         })
         .then((userData) => {
           this.userData = userData
@@ -405,31 +455,20 @@ export class FronteggOAuthClient {
   }
 
   /**
-   * Function to fetch the user details from Frontegg.
-   * If the user is not authenticated or the access token is expired, the function throws error.
-   * More information: https://docs.frontegg.com/reference/userscontrollerv2_getuserprofile
+   * Function to decode the user JWT access token and extract the user data.
    */
-  private async fetchUserData(userAccessToken: string): Promise<FronteggUserData> {
-    const response = await fetchWithAssert(
-      `${this.baseUrl}/frontegg/identity/resources/users/v2/me`,
-      {
-        credentials: 'include',
-        headers: {
-          Authorization: `Bearer ${userAccessToken}`,
-          'Content-Type': 'application/json',
-        },
-      },
-    )
-
-    const data = GET_FRONTEGG_USER_DATA_RESPONSE_SCHEMA.parse(await response.json())
+  private decodeAccessToken(userAccessToken: string): FronteggUserData {
+    const decodedJwt = decodeJwt(userAccessToken)
+    const parsedUserData = FRONTEGG_DECODED_TOKEN_SCHEMA.parse(decodedJwt)
 
     return {
-      externalUserId: data.id,
+      externalUserId: parsedUserData.sub,
       accessToken: userAccessToken,
-      email: data.email,
-      name: data.name,
-      profilePictureUrl: data.profilePictureUrl,
-      externalWorkspaceId: data.tenantId,
+      email: parsedUserData.email,
+      name: parsedUserData.name,
+      profilePictureUrl: parsedUserData.profilePictureUrl,
+      externalWorkspaceId: parsedUserData.tenantId,
+      impersonated: parsedUserData.act?.type === 'impersonation',
     }
   }
 }

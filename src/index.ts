@@ -3,5 +3,5 @@ export {
   FronteggOAuthClient,
   type FronteggUserData,
   type GetFronteggTokenResponse,
-  type GetFronteggUserDataResponse,
+  type FronteggDecodedToken,
 } from './frontegg-oauth-client'
