@@ -165,6 +165,16 @@ const GET_FRONTEGG_USER_DATA_RESPONSE_SCHEMA = z.object({
 
 export type GetFronteggUserDataResponse = z.infer<typeof GET_FRONTEGG_USER_DATA_RESPONSE_SCHEMA>
 
+const FRONTEGG_DECODED_TOKEN_SCHEMA = z.object({
+  sub: z.string(),
+  email: z.string(),
+  name: z.string(),
+  profilePictureUrl: z.string().nullable().optional(),
+  tenantId: z.string(),
+})
+
+export type FronteggDecodedToken = z.infer<typeof FRONTEGG_DECODED_TOKEN_SCHEMA>
+
 /**
  * Class providing a Frontegg OAuth login with AccessToken and UserData.
  * More information about native Frontegg authentication can be found at https://docs.frontegg.com/docs/native-hosted-login
@@ -246,7 +256,7 @@ export class FronteggOAuthClient {
     if (!this.userDataPromise) {
       this.userDataPromise = this.getAccessToken({ forceRefresh })
         .then((accessToken) => {
-          return this.fetchUserData(accessToken)
+          return this.decodeAccessToken(accessToken)
         })
         .then((userData) => {
           this.userData = userData
@@ -391,31 +401,29 @@ export class FronteggOAuthClient {
   }
 
   /**
-   * Function to fetch the user details from Frontegg.
-   * If the user is not authenticated or the access token is expired, the function throws error.
-   * More information: https://docs.frontegg.com/reference/userscontrollerv2_getuserprofile
+   * Function to decode the user JWT access token and extract the user data.
    */
-  private async fetchUserData(userAccessToken: string): Promise<FronteggUserData> {
-    const response = await fetchWithAssert(
-      `${this.baseUrl}/frontegg/identity/resources/users/v2/me`,
-      {
-        credentials: 'include',
-        headers: {
-          Authorization: `Bearer ${userAccessToken}`,
-          'Content-Type': 'application/json',
-        },
-      },
+  private decodeAccessToken(userAccessToken: string) {
+    const base64Url = userAccessToken.split('.')[1]
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+    const jsonPayload = decodeURIComponent(
+      window
+        .atob(base64)
+        .split('')
+        .map((c) => {
+          return `%${`00${c.charCodeAt(0).toString(16)}`.slice(-2)}`
+        })
+        .join(''),
     )
 
-    const data = GET_FRONTEGG_USER_DATA_RESPONSE_SCHEMA.parse(await response.json())
-
+    const decodedData = FRONTEGG_DECODED_TOKEN_SCHEMA.parse(JSON.parse(jsonPayload))
     return {
-      externalUserId: data.id,
+      externalUserId: decodedData.sub,
       accessToken: userAccessToken,
-      email: data.email,
-      name: data.name,
-      profilePictureUrl: data.profilePictureUrl,
-      externalWorkspaceId: data.tenantId,
+      email: decodedData.email,
+      name: decodedData.name,
+      profilePictureUrl: decodedData.profilePictureUrl,
+      externalWorkspaceId: decodedData.tenantId,
     }
   }
 }
