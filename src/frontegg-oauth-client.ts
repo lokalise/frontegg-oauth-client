@@ -305,12 +305,19 @@ export class FronteggOAuthClient {
       this.tokenExpirationTime = calculateTokenExpirationTime(data.expires_in)
       return this.accessToken
     } catch (error: unknown) {
+      const includeResponseBody = !['access_token', 'id_token', 'refresh_token'].some((key) =>
+        JSON.stringify(json).includes(key),
+      )
+
       throw new FronteggError({
         text: 'Error while parsing Frontegg response.',
         status: 500,
         url: `${this.baseUrl}/frontegg/oauth/authorize/silent`,
         fronteggTraceId: response.headers.get('frontegg-trace-id') ?? 'undefined',
-        body: error,
+        body: {
+          response: includeResponseBody ? json : 'Response body contains sensitive information.',
+          error,
+        },
       })
     }
   }
