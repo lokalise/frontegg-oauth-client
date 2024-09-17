@@ -1,6 +1,6 @@
 # Action that makes sure the PR titles follow conventional commit
 # https://github.com/amannn/action-semantic-pull-request
-name: "Lint PR"
+name: "Lint PR title"
 
 on:
     pull_request_target:
