@@ -297,11 +297,22 @@ export class FronteggOAuthClient {
     })
 
     const json: unknown = await response.json()
-    const data = GET_FRONTEGG_TOKEN_RESPONSE_SCHEMA.parse(json)
-    this.accessToken = data.access_token
-    this.refreshToken = data.refresh_token
-    this.tokenExpirationTime = calculateTokenExpirationTime(data.expires_in)
-    return this.accessToken
+    try {
+      const data = GET_FRONTEGG_TOKEN_RESPONSE_SCHEMA.parse(json)
+
+      this.accessToken = data.access_token
+      this.refreshToken = data.refresh_token
+      this.tokenExpirationTime = calculateTokenExpirationTime(data.expires_in)
+      return this.accessToken
+    } catch (error: unknown) {
+      throw new FronteggError({
+        text: 'Error while parsing Frontegg response.',
+        status: 500,
+        url: `${this.baseUrl}/frontegg/oauth/authorize/silent`,
+        fronteggTraceId: response.headers.get('frontegg-trace-id') ?? 'undefined',
+        body: error,
+      })
+    }
   }
 
   /**
