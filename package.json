@@ -1,43 +1,43 @@
 {
-  "name": "@lokalise/frontegg-oauth-client",
-  "version": "0.0.0-automatically-updated-during-publishing",
-  "scripts": {
-    "build": "vite build",
-    "lint:ts": "tsc --noEmit",
-    "lint": "biome check && npm run lint:ts",
-    "lint:fix": "biome check --write",
-    "test": "vitest run"
-  },
-  "files": ["dist"],
-  "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.cjs",
-      "import": "./dist/index.js"
+    "name": "@lokalise/frontegg-oauth-client",
+    "version": "0.0.0-automatically-updated-during-publishing",
+    "scripts": {
+        "build": "vite build",
+        "lint:ts": "tsc --noEmit",
+        "lint": "biome check && npm run lint:ts",
+        "lint:fix": "biome check --write",
+        "test": "vitest run"
+    },
+    "files": ["dist"],
+    "type": "module",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "require": "./dist/index.cjs",
+            "import": "./dist/index.js"
+        }
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "dependencies": {
+        "zod": "^3.23.8"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^1.9.1",
+        "@lokalise/biome-config": "^1.4.0",
+        "@lokalise/package-vite-config": "^3.1.0",
+        "jsdom": "^25.0.0",
+        "msw": "^2.4.8",
+        "semantic-release": "^24.1.1",
+        "typescript": "^5.6.2",
+        "vite": "^5.4.6",
+        "vitest": "^2.1.1"
+    },
+    "engines": {
+        "node": ">=20"
     }
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "zod": "^3.23.8"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^1.9.1",
-    "@lokalise/biome-config": "^1.4.0",
-    "@lokalise/package-vite-config": "^3.1.0",
-    "jsdom": "^25.0.0",
-    "msw": "^2.4.8",
-    "semantic-release": "^24.1.1",
-    "typescript": "^5.6.2",
-    "vite": "^5.4.6",
-    "vitest": "^2.1.1"
-  },
-  "engines": {
-    "node": ">=20"
-  }
 }
