@@ -27,7 +27,7 @@
         "zod": "^3.23.8"
     },
     "devDependencies": {
-        "@biomejs/biome": "^1.9.1",
+        "@biomejs/biome": "^1.9.2",
         "@lokalise/biome-config": "^1.4.0",
         "@lokalise/package-vite-config": "^3.1.1",
         "jsdom": "^25.0.0",
