@@ -2,9 +2,9 @@ import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 
 import {
+  type FronteggDecodedToken,
   FronteggOAuthClient,
   type GetFronteggTokenResponse,
-  type GetFronteggUserDataResponse,
 } from './frontegg-oauth-client'
 
 const EmptyResponse = (code: number) => new HttpResponse(null, { status: code })
@@ -19,27 +19,41 @@ const clientConfig = {
 
 const FRONTEGG_RESPONSE = {
   token_type: 'Bearer',
-  access_token: 'test-access-token',
+  access_token:
+    'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXItaWQiLCJlbWFpbCI6InRlc3RAbG9rYWxpc2UuY29tIiwibmFtZSI6ImR1bW15IHVzZXJuYW1lIiwicHJvZmlsZVBpY3R1cmVVcmwiOiJodHRwczovL3d3dy5ncmF2YXRhci5jb20vYXZhdGFyLzAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIiwidGVuYW50SWQiOiJ0ZXN0LXRlbmFudC1pZCJ9.dxFESK7KleQdEz4hBmd-pKMSKUN0uYJ44ycd-SQeAYBGfJcQQPCsjOWBDSlxGUodLmalhMMVDTvmN4G4La5lfOakas4kJzrfVAXfV_-ZYAiOHZaqS_OTMZaTPAcjWZfnNNEnewuNhZSiuzqEbaIpKOX4tmZOHH1ganJT2Z-gvRiArVC1zEZdZPFt0MVGl9Tt3Kmcgvf3j22j1FWI5AqVsiYFHolISaWveZyIR62qtF3pyGLRW-4qwoujV393Kf52kNWez0P7Ed70-yrVJX_D0buJ1aW-bPXSh1F0ifnGBvYKtoUqSLZ1e0InA3rTccWt5DIyOUULaE0asgJxB61Nqg',
   id_token: 'test-id-token',
   refresh_token: 'test-refresh-token',
   expires_in: 3600,
 } satisfies GetFronteggTokenResponse
 
+const FRONTEGG_IMPERSONATED_RESPONSE = {
+  ...FRONTEGG_RESPONSE,
+  access_token:
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXItaWQiLCJlbWFpbCI6InRlc3RAbG9rYWxpc2UuY29tIiwibmFtZSI6ImR1bW15IHVzZXJuYW1lIiwicHJvZmlsZVBpY3R1cmVVcmwiOiJodHRwczovL3d3dy5ncmF2YXRhci5jb20vYXZhdGFyLzAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIiwidGVuYW50SWQiOiJ0ZXN0LXRlbmFudC1pZCIsImFjdCI6eyJzdWIiOiJ0ZXN0LWFkbWluLXVzZXIiLCJ0eXBlIjoiaW1wZXJzb25hdGlvbiJ9fQ.lamGCm4sfTCsfyZ11-rnecqqJcAKua2IiCMQxHr5kQw',
+}
+
 const FRONTEGG_USER_DATA = {
-  id: 'test-user-id',
+  sub: 'test-user-id',
   email: 'test@lokalise.com',
   name: 'dummy username',
   profilePictureUrl: 'https://www.gravatar.com/avatar/00000000000000000000000000000000',
   tenantId: 'test-tenant-id',
-} satisfies GetFronteggUserDataResponse
+} satisfies FronteggDecodedToken
 
 const USER_DATA = {
-  externalUserId: FRONTEGG_USER_DATA.id,
+  externalUserId: FRONTEGG_USER_DATA.sub,
   accessToken: FRONTEGG_RESPONSE.access_token,
   email: FRONTEGG_USER_DATA.email,
   name: FRONTEGG_USER_DATA.name,
   profilePictureUrl: FRONTEGG_USER_DATA.profilePictureUrl,
   externalWorkspaceId: FRONTEGG_USER_DATA.tenantId,
+  isImpersonated: false,
+}
+
+const IMPERSONATED_USER_DATA = {
+  ...USER_DATA,
+  accessToken: FRONTEGG_IMPERSONATED_RESPONSE.access_token,
+  isImpersonated: true,
 }
 
 const server = setupServer()
@@ -65,9 +79,6 @@ describe('frontegg-oauth-client', () => {
         http.post(`${baseUrl}/frontegg/oauth/authorize/silent`, () =>
           HttpResponse.json(FRONTEGG_RESPONSE),
         ),
-        http.get(`${baseUrl}/frontegg/identity/resources/users/v2/me`, () =>
-          HttpResponse.json(FRONTEGG_USER_DATA),
-        ),
       )
 
       const client = new FronteggOAuthClient(clientConfig)
@@ -76,13 +87,24 @@ describe('frontegg-oauth-client', () => {
       expect(client.userData).toEqual(USER_DATA)
     })
 
+    it('returns impersonated user data based on auth token', async () => {
+      server.use(
+        // This is a request that is made to the Frontegg API when the cookie is available
+        http.post(`${baseUrl}/frontegg/oauth/authorize/silent`, () =>
+          HttpResponse.json(FRONTEGG_IMPERSONATED_RESPONSE),
+        ),
+      )
+
+      const client = new FronteggOAuthClient(clientConfig)
+      const userData = await client.getUserData()
+      expect(userData).toEqual(IMPERSONATED_USER_DATA)
+      expect(client.userData).toEqual(IMPERSONATED_USER_DATA)
+    })
+
     it('allows to fetch user data only once at a time', async () => {
       server.use(
         http.post(`${baseUrl}/frontegg/oauth/authorize/silent`, () =>
           HttpResponse.json(FRONTEGG_RESPONSE),
-        ),
-        http.get(`${baseUrl}/frontegg/identity/resources/users/v2/me`, () =>
-          HttpResponse.json(FRONTEGG_USER_DATA),
         ),
       )
 
@@ -102,17 +124,17 @@ describe('frontegg-oauth-client', () => {
     })
 
     it('returns user data based on refresh token', async () => {
+      const refreshedAccessToken =
+        'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXItaWQiLCJlbWFpbCI6InRlc3RAbG9rYWxpc2UuY29tIiwibmFtZSI6ImR1bW15IHVzZXJuYW1lIiwicHJvZmlsZVBpY3R1cmVVcmwiOiJodHRwczovL3d3dy5ncmF2YXRhci5jb20vYXZhdGFyLzAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIiwidGVuYW50SWQiOiJ0ZXN0LXRlbmFudC1pZCIsInNpZCI6InJlZnJlc2hlZC1zZXNzaW9uIn0.sSSFmSvkO7Rns6dkZsIqRhXzGfWPYhg2_IfK9sksqCnEpoiiQ5hNRy43hoU_rlGLJDehaMfxv9RYJuNJbU-HKIKrHyfsQWztGLyK11fEuMb1f3U9hd3-8eljIjk_SSrL3OGbvYu612qKkkEdyZkmjnCTxmKRtc3g0BSJI-EIDIXBoBKwRYb7p6TMdD5vba7krMZ-AbVp0eDjiiL6u8XorQa4Y95pkOSytfJl7T8T3-yPMlUAYep6Q4-1Lvg26W43KCTlb5-qsddPrH2T_FNL6LkVXaWxHbLtNRENpCQR6elD5528NgnBEOSphKZeuPUG4WvMsrOX2B0-nxFlzXooqg'
+
       server.use(
         http.post(`${baseUrl}/frontegg/oauth/authorize/silent`, () =>
           HttpResponse.json({ ...FRONTEGG_RESPONSE, expires_in: 0 }),
         ),
-        http.get(`${baseUrl}/frontegg/identity/resources/users/v2/me`, () =>
-          HttpResponse.json(FRONTEGG_USER_DATA),
-        ),
         http.post(`${baseUrl}/frontegg/oauth/token`, () =>
           HttpResponse.json({
             ...FRONTEGG_RESPONSE,
-            access_token: 'test-refreshed-access-token',
+            access_token: refreshedAccessToken,
           }),
         ),
       )
@@ -128,7 +150,7 @@ describe('frontegg-oauth-client', () => {
 
       const expectedUserDataRefreshed = {
         ...USER_DATA,
-        accessToken: 'test-refreshed-access-token',
+        accessToken: refreshedAccessToken,
       }
 
       expect(userDataRefreshed).toEqual(expectedUserDataRefreshed)
@@ -169,7 +191,7 @@ describe('frontegg-oauth-client', () => {
       const client = new FronteggOAuthClient(clientConfig)
       const accessToken = await client.fetchAccessTokenByOAuthCode('test-oauth-code')
 
-      expect(accessToken).toBe('test-access-token')
+      expect(accessToken).toBe(FRONTEGG_RESPONSE.access_token)
     })
   })
 
@@ -206,7 +228,7 @@ describe('frontegg-oauth-client', () => {
       const client = new FronteggOAuthClient(clientConfig)
       const accessToken = await client.fetchAccessTokenByOAuthRefreshToken('test-oauth-code')
 
-      expect(accessToken).toBe('test-access-token')
+      expect(accessToken).toBe(FRONTEGG_RESPONSE.access_token)
     })
   })
 
