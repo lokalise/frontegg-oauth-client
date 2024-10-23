@@ -47,13 +47,13 @@ const USER_DATA = {
   name: FRONTEGG_USER_DATA.name,
   profilePictureUrl: FRONTEGG_USER_DATA.profilePictureUrl,
   externalWorkspaceId: FRONTEGG_USER_DATA.tenantId,
-  impersonated: false,
+  isImpersonated: false,
 }
 
 const IMPERSONATED_USER_DATA = {
   ...USER_DATA,
   accessToken: FRONTEGG_IMPERSONATED_RESPONSE.access_token,
-  impersonated: true,
+  isImpersonated: true,
 }
 
 const server = setupServer()

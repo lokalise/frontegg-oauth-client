@@ -7,7 +7,7 @@ export interface FronteggUserData {
   email: string
   profilePictureUrl: string | null | undefined
   externalWorkspaceId: string
-  impersonated: boolean
+  isImpersonated: boolean
 }
 
 const GET_FRONTEGG_TOKEN_RESPONSE_SCHEMA = z.object({
@@ -158,6 +158,7 @@ const isTokenExpired = (tokenExpirationTime: number | null) => {
 
 /**
  * Function to decode a JWT token
+ * Based on https://stackoverflow.com/a/30106551/10876985 and https://github.com/auth0/jwt-decode
  *
  * @param token the JWT token to decode
  * @returns the decoded JWT token
@@ -468,7 +469,7 @@ export class FronteggOAuthClient {
       name: parsedUserData.name,
       profilePictureUrl: parsedUserData.profilePictureUrl,
       externalWorkspaceId: parsedUserData.tenantId,
-      impersonated: parsedUserData.act?.type === 'impersonation',
+      isImpersonated: parsedUserData.act?.type === 'impersonation',
     }
   }
 }
