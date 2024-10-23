@@ -204,12 +204,7 @@ const FRONTEGG_DECODED_TOKEN_SCHEMA = z.object({
   profilePictureUrl: z.string().nullable().optional(),
   tenantId: z.string(),
   act: z
-    .object({
-      sub: z
-        .string()
-        .describe('The Frontegg admin user ID of the user impersonating the current session'),
-      type: z.string(),
-    })
+    .record(z.string())
     .optional()
     .describe('Act object is available only when the current session is being impersonated'),
 })
@@ -469,7 +464,8 @@ export class FronteggOAuthClient {
       name: parsedUserData.name,
       profilePictureUrl: parsedUserData.profilePictureUrl,
       externalWorkspaceId: parsedUserData.tenantId,
-      isImpersonated: parsedUserData.act?.type === 'impersonation',
+      // the act object is available only when the current session is being impersonated
+      isImpersonated: parsedUserData.act !== undefined,
     }
   }
 }
