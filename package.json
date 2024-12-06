@@ -31,7 +31,7 @@
         "@lokalise/biome-config": "^1.5.0",
         "@lokalise/package-vite-config": "^3.1.1",
         "jsdom": "^25.0.1",
-        "msw": "^2.6.6",
+        "msw": "^2.6.7",
         "semantic-release": "^24.2.0",
         "typescript": "^5.7.2",
         "vite": "^5.4.11",
