@@ -29,13 +29,13 @@
     "devDependencies": {
         "@biomejs/biome": "^1.9.4",
         "@lokalise/biome-config": "^1.6.1",
-        "@lokalise/package-vite-config": "^3.1.1",
+        "@lokalise/package-vite-config": "^3.1.2",
         "jsdom": "^26.0.0",
         "msw": "^2.7.3",
         "semantic-release": "^24.2.3",
         "typescript": "^5.8.2",
         "vite": "^5.4.11",
-        "vitest": "^2.1.8"
+        "vitest": "^3.0.7"
     },
     "engines": {
         "node": ">=20"
