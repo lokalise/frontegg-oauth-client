@@ -32,7 +32,7 @@
         "@lokalise/package-vite-config": "^4.0.0",
         "jsdom": "^29.1.1",
         "msw": "^2.15.0",
-        "semantic-release": "^25.0.7",
+        "semantic-release": "^25.0.8",
         "typescript": "^6.0.3",
         "vite": "^6.3.5",
         "vitest": "^3.2.4"
