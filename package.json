@@ -24,7 +24,7 @@
         "access": "public"
     },
     "dependencies": {
-        "zod": "^4.6.4"
+        "zod": "^4.6.5"
     },
     "devDependencies": {
         "@biomejs/biome": "^2.5.13",
