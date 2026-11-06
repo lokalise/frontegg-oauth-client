@@ -55,16 +55,31 @@ jobs:
         run: pnpm run test
 
   changeset-check:
-    # Skip for PRs labelled `skip-release` (Dependabot applies this label to every
-    # PR it opens). The action skips the changesets "Release Packages" PR itself.
-    if: ${{ github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip-release') }}
+    # Skipped for PRs labelled `skip-release` (Dependabot applies it) and for the
+    # "Release Packages" PR, which consumes the changesets.
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-release') && !startsWith(github.head_ref, 'changeset-release/') }}
+    name: Changed package has a changeset
     runs-on: ubuntu-latest
-    name: Changed public packages have changesets
     steps:
-      # Fails when the package changed since the base branch and no changeset covers it.
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Setup pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.x
+          cache: "pnpm"
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
       # Use an empty changeset (`pnpm changeset --empty`) for changes that must not release.
-      - name: Check changesets for changed public packages
-        uses: lokalise/github-actions/changeset-check@stable # zizmor: ignore[unpinned-uses] org-controlled reusable, pinned to @stable by policy
+      - name: Check changesets
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: pnpm exec changeset status --since="origin/$BASE_REF"
 
   automerge:
     needs: pr-checks-tests
