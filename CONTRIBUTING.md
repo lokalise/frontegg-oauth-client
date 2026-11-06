@@ -14,9 +14,6 @@
     - [Reverting Commits](#reverting-commits)
     - [Highlight your code snippets in your messages](#highlight-your-code-snippets-in-your-messages)
   - [Release Process](#release-process)
-    - [1) Feature Branches (regular changes)](#1-feature-branches-regular-changes)
-    - [2) Pre-Releases (Beta / Release Candidate branches for complex changes)](#2-pre-releases-beta-/-release-candidate-branches-for-complex-changes)
-    - [3) Experimental Releases](#3-experimental-releases)
   <!-- TOC -->
 
 ---
@@ -26,23 +23,21 @@
 - Install [pnpm](https://pnpm.io/installation) 12 and run `pnpm install`.
 - `git checkout -b my-branch-name`. Short, accurate and lowercase branch names are recommended.
 - Commit your changes. Check our [Commit Message Convention](#commit-message-convention).
+- Add a changeset with `pnpm changeset`. See [Release Process](#release-process).
 - Clean your commit history(if required). We recommend using [rebase interactive](#rebase-interactive).
 - PR is approved by at least one of the [Codeowners](https://github.com/lokalise/npm-package-template/blob/main/CODEOWNERS).
 - Rebase with `main` and **Merge** your changes.
 
 ### Commit Message Convention
 
-This project follows the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) approach and uses [semantic releases](https://github.com/semantic-release/semantic-release) for automated version management, release notes and package publishing.
-
-Check [common commit types](#common-commit-types) as `semantic-release` processes them to determine the next version as well as producing release notes when a PR is merged in `main`.
+This project follows the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) approach. PR titles are checked against it. Versions and release notes come from [changesets](#release-process), not from commit messages.
 
 ### Common Commit Types
 
-- feat → Addition or removal of features. Eg: `feat: add table on landing page`, `feat: remove table from landing page`. Will increase the `minor` version.
-- fix → Bug fixing, followed by the bug. Eg: `fix: illustration overflows in mobile view`. Will increase the `patch` version.
-- refactor → Code refactors. E.g. `refactor: change to use shared merge refs hook in Menu`. Will increase the `patch` version.
-- chore → _Will not trigger a release._ Code that package won't output. E.g. `chore: add revert documentation to contributing docs`.
-- `BREAKING CHANGE: ` or `BREAKING CHANGES: ` footer → Will increase the `major` version. Breaking changes are only allowed for the `feat` and `fix` commit types. More info on [breaking changes](#breaking-changes).
+- feat → Addition or removal of features. Eg: `feat: add table on landing page`, `feat: remove table from landing page`.
+- fix → Bug fixing, followed by the bug. Eg: `fix: illustration overflows in mobile view`.
+- refactor → Code refactors. E.g. `refactor: change to use shared merge refs hook in Menu`.
+- chore → Code that package won't output. E.g. `chore: add revert documentation to contributing docs`.
 
 ### Rebase Interactive
 
@@ -64,13 +59,7 @@ In case you're removing or renaming something, see if you can instead mark that 
 
 #### Marking changes as breaking
 
-If changes are breaking, they **must** contain `BREAKING CHANGE` or `BREAKING CHANGES` in the footer of the commit message. Breaking changes are only allowed for the `feat` and `fix` commit types.
-
-```shell
-git commit -m 'feat: remove "foo" export
-
-BREAKING CHANGE: "foo" export no longer available, use "bar".'
-```
+If changes are breaking, pick `major` in the changeset and say in its summary what consumers need to change.
 
 #### Removing deprecated functionality
 
@@ -97,7 +86,7 @@ This reverts commit a7721472aad3bab9deff29e184df9a05b274e2dc. Reason to revert.
 
 Keep in mind that the standard commit message from `git revert` is slightly different, so make sure to use the `--edit` option when running `git revert` to adjust the commit message.
 
-You can follow any of the regular prerelease and release processes documented below with revert commits.
+A revert that changes the published package needs a changeset like any other change.
 
 ### Highlight your code snippets in your messages
 
@@ -111,45 +100,9 @@ git commit -m "feat: add \`boolean\` prop \`open\` to \`<dialog>\`"
 
 ## Release Process
 
-### 1) Feature Branches (regular changes)
+Releases are managed with [changesets](https://github.com/changesets/changesets).
 
-The most common process is to branch off from **main**, add your code and merge it to **main** with `Rebase and merge`
-option. [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
-and [Semantic Releases](https://github.com/semantic-release/semantic-release) will take care of the rest. See image
-below for visual clarity:
-
-<img src="https://user-images.githubusercontent.com/2275908/193548546-ddc9582d-d724-4903-a531-71aa3c5bf1ac.png" alt="Release Flow" width="600">
-
-### 2) Pre-Releases (Beta / Release Candidate branches for complex changes)
-
-(See image below for visual clarity)
-
-- Branch off from `main` to your `feature-branch`.
-- Commit the code you need and do your local tests.
-- Open a PR and wait for approval.
-- Checkout `beta` branch and `cherry-pick` your changes from `feature-branch`:
-  - If you previously checked out beta, always ensure it is always up-to-date with `main` before `cherry-pick`'ing. By doing it, you release a `beta` version based on the current `main` branch + your cherry-picked changes.
-  - **NOTE:** Everytime a push in beta occurs a new version gets deployed in NPM. Changelog, Package.json and Lock files also change. Update your local beta branch after the release has finished.
-  - Use the beta package to test your application.
-  - **NOTE:** ⛔ Never merge `beta` in `main`.
-- After tests are complete you either:
-  - Merge your `feature-branch` in `main`.
-  - `cherry-pick` your `feature-branch` commits into an `rc` branch to hold / group those for a release in the upcoming weeks.
-
-<img src="https://user-images.githubusercontent.com/2275908/193548740-692a3567-d305-4437-b298-742a2e97980d.png" alt="Pre-Releases Flow" width="600">
-
-### 3) Experimental Releases
-
-(See image below for visual clarity)
-
-Similar to pre-releases (2), they're not required to either be tested through beta or rc branches. They are one off simpler and less complex experimental features.
-
-- Branch off from `main` to your `feature-branch`.
-- Commit the code you need and do your local tests.
-- Open a PR and wait for approval.
-- Branch off from `feature-branch` to a branch prepended with `exp-*`. eg. `exp-feature-branch`.
-- When pushing your changes a new experimental release is promoted. eg. `1.3.0-exp-feature-branch.1`.
-- **NOTE:** ⛔ Never merge `exp-*` branches in `main`.
-- After tests are complete **delete** the `exp-*` branch in origin.
-
-<img src="https://user-images.githubusercontent.com/2275908/195072598-be6c6ab4-2be1-4f74-941f-5f4ff0337ed0.png" alt="Experimental Releases" width="600">
+- Every PR needs a changeset. Run `pnpm changeset`, pick the bump (`patch`, `minor` or `major`) and write a one-line summary for consumers. It lands in `CHANGELOG.md`.
+- A change that must not release (tooling, tests, docs) takes an empty changeset: `pnpm changeset --empty`.
+- The `changeset-check` job fails a PR without a changeset. PRs labelled `skip-release` skip it; Dependabot applies that label.
+- After merge to `main`, the release workflow opens a "Release Packages" PR that bumps the version and updates `CHANGELOG.md`, merges it and publishes the package to npm.
