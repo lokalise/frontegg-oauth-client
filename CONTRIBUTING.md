@@ -23,7 +23,7 @@
 
 ## Submitting a Change
 
-- `npm install`.
+- Install [pnpm](https://pnpm.io/installation) 12 and run `pnpm install`.
 - `git checkout -b my-branch-name`. Short, accurate and lowercase branch names are recommended.
 - Commit your changes. Check our [Commit Message Convention](#commit-message-convention).
 - Clean your commit history(if required). We recommend using [rebase interactive](#rebase-interactive).
