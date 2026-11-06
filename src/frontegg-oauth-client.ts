@@ -204,7 +204,7 @@ const FRONTEGG_DECODED_TOKEN_SCHEMA = z.object({
   profilePictureUrl: z.string().nullable().optional(),
   tenantId: z.string(),
   act: z
-    .record(z.string())
+    .record(z.string(), z.string())
     .optional()
     .describe('Act object is available only when the current session is being impersonated'),
 })
@@ -305,7 +305,7 @@ export class FronteggOAuthClient {
         })
     }
 
-    return this.userDataPromise
+    return await this.userDataPromise
   }
 
   /**
