@@ -13,7 +13,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
-          node-version: 20.x
+          node-version: 24.x
           cache: "pnpm"
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -30,7 +30,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
-          node-version: 20.x
+          node-version: 24.x
           cache: "pnpm"
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -47,12 +47,24 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
-          node-version: 20.x
+          node-version: 24.x
           cache: "pnpm"
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
       - name: Run Tests
         run: pnpm run test
+
+  changeset-check:
+    # Skip for PRs labelled `skip-release` (Dependabot applies this label to every
+    # PR it opens). The action skips the changesets "Release Packages" PR itself.
+    if: ${{ github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip-release') }}
+    runs-on: ubuntu-latest
+    name: Changed public packages have changesets
+    steps:
+      # Fails when the package changed since the base branch and no changeset covers it.
+      # Use an empty changeset (`pnpm changeset --empty`) for changes that must not release.
+      - name: Check changesets for changed public packages
+        uses: lokalise/github-actions/changeset-check@stable # zizmor: ignore[unpinned-uses] org-controlled reusable, pinned to @stable by policy
 
   automerge:
     needs: pr-checks-tests
