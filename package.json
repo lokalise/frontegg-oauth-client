@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.6.5",
-    "@lokalise/biome-config": "^4.0.0",
+    "@lokalise/biome-config": "^5.0.0",
     "@lokalise/package-vite-config": "^4.0.0",
     "jsdom": "^29.1.1",
     "msw": "^2.15.0",
