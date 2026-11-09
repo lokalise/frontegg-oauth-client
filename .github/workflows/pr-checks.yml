@@ -57,7 +57,7 @@ jobs:
   changeset-check:
     # Skipped for PRs labelled `skip-release` (Dependabot applies it) and for the
     # "Release Packages" PR, which consumes the changesets.
-    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-release') && !startsWith(github.head_ref, 'changeset-release/') }}
+    if: ${{ github.event.pull_request.user.login != 'dependabot[bot]' && !contains(github.event.pull_request.labels.*.name, 'skip-release') && !startsWith(github.head_ref, 'changeset-release/') }}
     name: Changed package has a changeset
     runs-on: ubuntu-latest
     steps:
