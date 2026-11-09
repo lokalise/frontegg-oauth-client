@@ -1,4 +1,5 @@
 ---
+'@lokalise/frontegg-oauth-client': patch
 ---
 
-Build and release tooling only: the published package is unchanged.
+Publish through changesets. No API change.
